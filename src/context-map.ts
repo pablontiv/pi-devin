@@ -7,6 +7,7 @@ import {
   type Tool,
   type TranscriptContext,
 } from "@earendil-works/pi-ai";
+import { unpackThinkingSignature, type ChatThinking } from "./thinking.js";
 
 export interface ContentPart {
   type: "text" | "image";
@@ -20,6 +21,8 @@ export interface ChatHistoryItem {
   content: string | ContentPart[];
   tool_call_id?: string;
   tool_calls?: Array<{ id: string; name: string; arguments: string }>;
+  /** Prior reasoning, replayed so the server can verify and continue it. */
+  thinking?: ChatThinking;
 }
 
 export interface ToolDef {
@@ -29,7 +32,7 @@ export interface ToolDef {
 }
 
 export interface MappedChat {
-  /** Sent in GetChatMessageRequest.prompt, separately from conversation history. */
+  /** Goes into GetChatMessageRequest.prompt, separately from conversation history. */
   systemPrompt?: string;
   messages: ChatHistoryItem[];
   tools: ToolDef[];
@@ -62,6 +65,7 @@ export function mapContextToChat(context: TranscriptContext): MappedChat {
     if (message.role === "assistant") {
       const texts: string[] = [];
       const toolCalls: Array<{ id: string; name: string; arguments: string }> = [];
+      let thinking: ChatThinking | undefined;
       for (const part of message.content) {
         if (part.type === "text") texts.push(part.text);
         if (part.type === "toolCall") {
@@ -71,11 +75,25 @@ export function mapContextToChat(context: TranscriptContext): MappedChat {
             arguments: JSON.stringify(part.arguments ?? {}),
           });
         }
+        if (part.type === "thinking") {
+          const decoded = unpackThinkingSignature(part.thinkingSignature);
+          // One thinking slot per message on the wire, and an unsigned trace is
+          // not replayable — keep the newest block that the server can verify.
+          if (part.thinking && decoded.signature) {
+            thinking = {
+              text: part.thinking,
+              signature: decoded.signature,
+              signatureType: decoded.signatureType,
+              redacted: part.redacted,
+            };
+          }
+        }
       }
       messages.push({
         role: "assistant",
         content: texts.join("\n"),
         tool_calls: toolCalls.length > 0 ? toolCalls : undefined,
+        thinking,
       });
       continue;
     }

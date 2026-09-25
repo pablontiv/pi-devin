@@ -1,6 +1,7 @@
 import type { ExtensionAPI, ProviderModelConfig } from "@earendil-works/pi-coding-agent";
 import type { Api, Model, OAuthCredentials, OAuthLoginCallbacks } from "@earendil-works/pi-ai";
-import { authStatus, loginWithCli, readCredentials } from "../src/credentials.js";
+import { authStatus, ensureCredentials, loginWithCli, readCredentials } from "../src/credentials.js";
+import { readDevinDesktopApiKey } from "../src/desktop-auth.js";
 import { whichDevin, devinVersion } from "../src/cli.js";
 import {
   type CachedDevinCatalog,
@@ -107,6 +108,7 @@ export default async function (pi: ExtensionAPI): Promise<void> {
 
   if (!isOffline()) {
     try {
+      if (!readCredentials()) await ensureCredentials();
       if (readCredentials()) {
         if (!cached) {
           await refreshCatalog(pi);
@@ -127,11 +129,18 @@ export default async function (pi: ExtensionAPI): Promise<void> {
       const bin = await whichDevin();
       const version = await devinVersion();
       const status = await authStatus();
+      const creds = readCredentials();
+      const desktop = creds ? null : await readDevinDesktopApiKey();
       ctx.ui.notify(
         [
           bin ? `CLI: ${bin}` : "CLI: not found",
           version ? `CLI version: ${version}` : "CLI version: unknown",
           `Client identity: ${CLIENT_IDE} ${CLIENT_VERSION}`,
+          creds
+            ? `Credentials: ${creds.path}`
+            : desktop
+              ? `Credentials: none stored yet; Devin Desktop sign-in found at ${desktop.source}`
+              : "Credentials: none found (no CLI store, no Devin Desktop sign-in)",
           status.loggedIn ? "Auth: signed in via Devin CLI" : "Auth: not signed in. Run /login devin or `devin auth login`",
         ].join("\n"),
         status.loggedIn && bin ? "info" : "warning",
