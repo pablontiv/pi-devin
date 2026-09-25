@@ -17,11 +17,14 @@ workspace:
       scripts/contribution-preflight.sh lands, perform and record the equivalent
       commands manually. Stop on conflict, non-fast-forward, remote/tag
       mismatch, or unknown state; never reset, abort, force-push, or improvise.
-      Bootstrap exception: while pi-devin-1s2 is open and local/integration
-      does not yet exist, that task may run in a clean dedicated worktree after
-      remote and tag verification; it proves main/integration behavior in
-      disposable fixtures. pi-devin-ppk performs the first live topology/rebase
-      validation.
+      Bootstrap exception: while pi-devin-ppk is open and local/integration
+      does not yet exist, only pi-devin-1s2, pi-devin-3l6, and pi-devin-ppk may
+      run in clean dedicated worktrees after remote and tag verification. They
+      use preflight bootstrap mode; pi-devin-1s2 proves main/integration
+      behavior in disposable fixtures. pi-devin-ppk creates local/integration
+      and must
+      run normal mode immediately afterward. No other task may omit the normal
+      integration rebase.
     isolation_strategy: dedicated-worktree
     development_workflow: |
       Use test-driven development for behavior changes. Keep one local-only
