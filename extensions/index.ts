@@ -11,7 +11,7 @@ import {
   writeCatalogCache,
 } from "../src/catalog-cache.js";
 import { FALLBACK_MODELS, loadCliCatalog, modelsFromCatalog } from "../src/models.js";
-import { CLIENT_IDE, CLIENT_VERSION } from "../src/metadata.js";
+import { CLIENT_IDE, resolveRuntimeClientVersion } from "../src/metadata.js";
 import { streamDevin } from "../src/stream.js";
 
 const PROVIDER_ID = "devin";
@@ -131,11 +131,17 @@ export default async function (pi: ExtensionAPI): Promise<void> {
       const status = await authStatus();
       const creds = readCredentials();
       const desktop = creds ? null : await readDevinDesktopApiKey();
+      let clientVersion: string;
+      try {
+        clientVersion = await resolveRuntimeClientVersion();
+      } catch (error) {
+        clientVersion = `unavailable (${error instanceof Error ? error.message : String(error)})`;
+      }
       ctx.ui.notify(
         [
           bin ? `CLI: ${bin}` : "CLI: not found",
           version ? `CLI version: ${version}` : "CLI version: unknown",
-          `Client identity: ${CLIENT_IDE} ${CLIENT_VERSION}`,
+          `Client identity: ${CLIENT_IDE} ${clientVersion}`,
           creds
             ? `Credentials: ${creds.path}`
             : desktop
