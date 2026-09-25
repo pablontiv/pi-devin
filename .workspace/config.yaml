@@ -1,0 +1,121 @@
+schema_version: workspace-control/v1
+
+workspace:
+  context_sources:
+    - AGENTS.md
+    - CONTRIBUTING.md
+  workflow:
+    base_branch: main
+    sync_strategy: |
+      At the start of every new session, verify the three canonical remotes,
+      require a clean working tree, fetch --prune --tags from origin, upstream,
+      and mizorewww, fast-forward the primary main checkout from upstream/main,
+      create a recovery ref, then rebase the local/integration worktree onto
+      upstream/main. Until scripts/contribution-preflight.sh lands, perform and
+      record the equivalent commands manually. Stop on any conflict, non-fast-
+      forward result, remote mismatch, or unknown state; never reset, abort,
+      force-push, or improvise around the failure.
+    isolation_strategy: dedicated-worktree
+    development_workflow: |
+      Use test-driven development for behavior changes. Keep one local-only
+      local/integration worktree containing all locally required changes; create
+      every upstream contribution in a separate clean worktree from
+      upstream/main. local/integration must never be a pull request head.
+    commit_policy: |
+      Use Conventional Commits. Literal work must preserve the original author,
+      source repository, and commit. Adapted work must record the original
+      author plus Based-on repository and commit provenance.
+    delivery_mode: pull-request
+    delivery_gate: |
+      Every upstreamable feature or bug requires its own upstream issue and a
+      focused pull request to kashyab12/pi-devin that links that issue. Use a
+      dedicated task branch pushed to origin as the pull request head. Human
+      approval is required before posting an issue or comment, opening or
+      updating a PR, merging, publishing, pushing a remote, or performing any
+      other external effect. Never push directly to upstream.
+  pre_checks:
+    - >-
+      Run scripts/contribution-preflight.sh when present; otherwise run its
+      documented manual equivalent.
+    - >-
+      Verify origin is pablontiv/pi-devin, upstream is kashyab12/pi-devin,
+      and mizorewww is mizorewww/pi-devin.
+    - >-
+      Verify the selected task Bead is claimed and the task worktree is clean.
+  acceptance_checks:
+    - Run npm test and npm run typecheck.
+    - >-
+      Map every acceptance criterion and preserved invariant to
+      repository-contained evidence.
+  review_checks:
+    - Obtain a fresh independent review of the exact candidate SHA.
+    - >-
+      Run a security-focused review when credentials, auth, metadata, or
+      crypto paths change.
+  post_checks:
+    - >-
+      Verify the pushed feature branch SHA equals the reviewed candidate SHA.
+    - >-
+      Verify every upstream PR links its upstream issue and records source
+      attribution.
+    - >-
+      Verify Pi still resolves the installed integration worktree and its
+      Devin catalog.
+  monitoring: |
+    Provider protocol changes must record actionable failure diagnostics and a
+    bounded live smoke when the task contract authorizes one.
+  external_effects: |
+    Operate read-only until both the task contract and a human authorize the
+    exact GitHub issue, PR, comment, merge, publication, push, or other external
+    payload and action. Authorization for one action does not authorize another.
+  credential_policy: |
+    Use existing declared Devin/Pi credential mechanisms. Never print, commit,
+    copy into reports, rotate, or persist credential values outside their owner.
+  knowledge_policy: |
+    Beads is the complete canonical operational record. Append final lifecycle
+    and gate outcomes to Bead notes; keep bounded handoffs and review findings
+    in Bead comments; bind branches, commits, issues, PRs, CI, live smokes, and
+    transcripts through bd provenance. Repository documentation is for product
+    and contribution knowledge, never Roadmap execution reports.
+  cleanup_policy: |
+    Offer cleanup after delivery; never remove worktrees, branches, recovery
+    refs, or evidence automatically.
+  custom_rules:
+    - >-
+      origin is pablontiv/pi-devin and is the writable fork; upstream is
+      kashyab12/pi-devin and is the canonical read-only repository; mizorewww is
+      mizorewww/pi-devin and is a read-only, provenance-only source.
+    - >-
+      Never push directly to upstream. Push a dedicated task branch to origin
+      only after human approval.
+    - >-
+      local/integration is local-only, is the source installed in Pi, and must
+      never be a pull request head.
+    - >-
+      Every upstreamable feature or bug has its own upstream issue and focused
+      pull request to upstream, and the pull request links its issue.
+    - >-
+      Literal work from mizorewww must preserve the original author, repository,
+      and commit. Adapted work must preserve the original author and record
+      Based-on repository and commit provenance.
+    - >-
+      Changes already present upstream and package-name, release-only, or
+      translation-only downstream changes are not resubmitted.
+    - >-
+      Human approval is required before posting an issue or comment, opening or
+      updating a pull request, merging, publishing, pushing any remote, or any
+      other external effect.
+    - >-
+      Every issue or PR title, body, and comment must pass Humanizer v3.0.0 in
+      embedded mode, using the installed source at
+      /Users/pones/.pi/agent/skills/humanizer/SKILL.md, before approval or
+      posting. Preserve all facts, identifiers, code, commands, paths, links,
+      attribution, and uncertainty. Humanizer never authorizes posting.
+
+repositories:
+  pablontiv/pi-devin:
+    repo:
+      id: pablontiv/pi-devin
+      path: /Users/Shared/vendor/pi-devin
+      managed: true
+      verified_revision: 98e430f5f7951e23b299c1b17b95dbc43042f87b

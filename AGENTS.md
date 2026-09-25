@@ -32,3 +32,27 @@ src/context-map.ts    # Pi Context → Cognition chat history (+ system prompt f
 - Field numbers come from the `exa.api_server_pb` descriptors embedded in Devin's language server binary (`/Applications/Devin.app/.../bin/language_server_macos_arm`) — check them there instead of guessing.
 - Do not depend on Zed or ACP. Pi keeps tools, permissions, and the session tree.
 - Package must stay installable as a Pi package: `keywords: ["pi-package"]` and `pi.extensions`. The npm name is `pi-devin-local` (upstream owns `pi-devin`), so the gallery lists this fork separately.
+
+## Contribution governance
+
+These rules apply even when another task document abbreviates the workflow. `CONTRIBUTING.md` provides the contributor-facing sequence, while `.workspace/config.yaml` is the machine-readable workspace control.
+
+### Remotes and branches
+
+- `origin` is `pablontiv/pi-devin`, the writable fork. A push still requires human approval for that exact action.
+- `upstream` is `kashyab12/pi-devin`, the canonical read-only repository. Never push directly to `upstream` or otherwise write to it.
+- `mizorewww` is `mizorewww/pi-devin`, a read-only, provenance-only source for historical downstream work; it is not a delivery target.
+- `local/integration` is local-only and is the source installed in Pi. It must never be a pull request head. Build each upstream contribution in a clean, dedicated task worktree from `upstream/main`, then use a task branch pushed to `origin` as the PR head after approval.
+
+### Upstream contribution contract
+
+- Every upstreamable feature or bug requires its own upstream issue and a focused pull request to `kashyab12/pi-devin`; the pull request must link the issue. Do not bundle unrelated work.
+- Literal work from `mizorewww` must preserve the original author and identify the source repository and commit. Adapted work must identify the original author and record `Based-on` repository and commit provenance.
+- Changes already present upstream and package-name, release-only, or translation-only downstream changes are not resubmitted.
+- Use Conventional Commits and the task's required trailers. Preserve package behavior unless the task explicitly changes it.
+
+### External effects and GitHub text
+
+Operate read-only by default. Human approval is required before posting an issue or comment, opening or updating a pull request, merging, publishing, pushing any remote, force-pushing, or performing any other external effect. Approval must cover the exact payload and action and cannot override the ban on direct upstream writes.
+
+Every issue or PR title, body, and comment must pass Humanizer v3.0.0 in embedded mode, using the installed source at `/Users/pones/.pi/agent/skills/humanizer/SKILL.md`, before approval or posting. Preserve all facts, identifiers, code, commands, paths, links, attribution, and uncertainty. Humanizer never authorizes posting; the separate human external-effect gate still applies.
