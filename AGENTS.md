@@ -44,6 +44,12 @@ These rules apply even when another task document abbreviates the workflow. `CON
 - `mizorewww` is `mizorewww/pi-devin`, a read-only, provenance-only source for historical downstream work; it is not a delivery target.
 - `local/integration` is local-only and is the source installed in Pi. It must never be a pull request head. Build each upstream contribution in a clean, dedicated task worktree from `upstream/main`, then use a task branch pushed to `origin` as the PR head after approval.
 
+### Mandatory preflight
+
+From the root of a clean, dedicated task worktree, run `scripts/contribution-preflight.sh --normal BEAD_ID` before contribution work. It verifies the exact remotes, fetches heads and collision-safe tag namespaces, fast-forwards the primary `main`, records a recovery ref, rebases `local/integration`, and runs tests and typechecking. Stop on every failure; a rebase conflict is intentionally left in place for diagnosis.
+
+`--bootstrap` is temporary and fail-closed. It is accepted only for `pi-devin-1s2`, `pi-devin-3l6`, or `pi-devin-ppk` while `pi-devin-ppk` is open and `local/integration` is absent. It performs remote/tag verification without changing `main` or `local/integration`.
+
 ### Upstream contribution contract
 
 - Every upstreamable feature or bug requires its own upstream issue and a focused pull request to `kashyab12/pi-devin`; the pull request must link the issue. Do not bundle unrelated work.

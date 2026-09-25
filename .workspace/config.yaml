@@ -7,14 +7,24 @@ workspace:
   workflow:
     base_branch: main
     sync_strategy: |
-      At the start of every new session, verify the three canonical remotes,
-      require a clean working tree, fetch --prune --tags from origin, upstream,
-      and mizorewww, fast-forward the primary main checkout from upstream/main,
-      create a recovery ref, then rebase the local/integration worktree onto
-      upstream/main. Until scripts/contribution-preflight.sh lands, perform and
-      record the equivalent commands manually. Stop on any conflict, non-fast-
-      forward result, remote mismatch, or unknown state; never reset, abort,
-      force-push, or improvise around the failure.
+      At the start of every new session, verify the three canonical remotes and
+      require a clean selected task worktree. Fetch heads with --prune --no-tags
+      from origin, upstream, and mizorewww. Fetch canonical tags from upstream
+      into refs/tags/* without force; fetch mizorewww tags into
+      refs/tags/mizorewww/*; verify overlapping origin tags equal upstream.
+      Run scripts/contribution-preflight.sh --normal BEAD_ID. It fast-forwards
+      the primary main checkout from upstream/main, creates a recovery ref, then
+      rebases local/integration onto upstream/main and runs the repository
+      validation. Stop on conflict, non-fast-forward, remote/tag mismatch, or
+      unknown state; never reset, abort, force-push, or improvise.
+      Bootstrap exception: while pi-devin-ppk is open and local/integration
+      does not yet exist, only pi-devin-1s2, pi-devin-3l6, and pi-devin-ppk may
+      run in clean dedicated worktrees after remote and tag verification. They
+      use preflight bootstrap mode; pi-devin-1s2 proves main/integration
+      behavior in disposable fixtures. pi-devin-ppk creates local/integration
+      and must
+      run normal mode immediately afterward. No other task may omit the normal
+      integration rebase.
     isolation_strategy: dedicated-worktree
     development_workflow: |
       Use test-driven development for behavior changes. Keep one local-only
@@ -35,8 +45,8 @@ workspace:
       other external effect. Never push directly to upstream.
   pre_checks:
     - >-
-      Run scripts/contribution-preflight.sh when present; otherwise run its
-      documented manual equivalent.
+      Run scripts/contribution-preflight.sh --normal BEAD_ID from the clean
+      selected task worktree.
     - >-
       Verify origin is pablontiv/pi-devin, upstream is kashyab12/pi-devin,
       and mizorewww is mizorewww/pi-devin.

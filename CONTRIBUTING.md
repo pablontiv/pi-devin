@@ -20,6 +20,24 @@ Keep `local/integration` local-only as the source installed in Pi. `local/integr
 
 Use test-driven development for behavior changes, keep changes focused, and use Conventional Commits with any task-required trailers. Do not alter package behavior unless the task calls for it.
 
+## Run the contribution preflight
+
+Invoke the script from the root of the clean, dedicated task worktree and provide the selected Bead ID:
+
+```sh
+scripts/contribution-preflight.sh --normal pi-devin-xyz
+```
+
+Normal mode verifies that the configured remotes are exactly `origin=pablontiv/pi-devin`, `upstream=kashyab12/pi-devin`, and `mizorewww=mizorewww/pi-devin`. It fetches remote heads without tags, installs canonical upstream tags under `refs/tags/*`, installs historical mizorewww tags under `refs/tags/mizorewww/*`, and rejects a same-name origin/upstream tag with different object IDs. It then fast-forwards the primary `main`, creates a unique `refs/recovery/contribution-preflight/*` ref, rebases the existing `local/integration` worktree onto `upstream/main`, and runs `npm test` plus `npm run typecheck`. It reports the before/after SHAs and leaves rebase state and the recovery ref intact if a conflict occurs. It never pushes, rewrites a tag, prunes the mizorewww tag namespace, or creates `local/integration`.
+
+The temporary bootstrap form is:
+
+```sh
+scripts/contribution-preflight.sh --bootstrap pi-devin-1s2
+```
+
+Bootstrap mode stops after remote and tag verification and does not change `main` or `local/integration`. It fails unless the selected ID is `pi-devin-1s2`, `pi-devin-3l6`, or `pi-devin-ppk`, `pi-devin-ppk` is open, and `local/integration` is absent. Normal mode fails closed when the integration worktree is missing. Do not work around any preflight failure with a reset, rebase abort, forced fetch, or push.
+
 ## Issue and pull request requirement
 
 Every upstreamable feature or bug must have its own upstream issue and a focused pull request to `kashyab12/pi-devin`. The pull request must link that issue and must not include unrelated changes. An existing issue may be used only when it actually covers the contribution.
